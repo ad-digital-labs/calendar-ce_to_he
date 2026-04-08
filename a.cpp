@@ -190,10 +190,6 @@ static long he_tishrei1(long y)
     if (ylen == 382) jdn++;
     return jdn;
 }
-=======
->>>>>>> 66880ae (corrected01)
-=======
->>>>>>> correct
 
 struct caltime::calendar caltime::convert_ce_to_he(struct calendar cal)
 {
@@ -207,22 +203,13 @@ struct caltime::calendar caltime::convert_ce_to_he(struct calendar cal)
         long m   = cal.mo + 12 * a - 3;
         long jdn = cal.date + (153 * m + 2) / 5 + 365 * y
                    + y / 4 - y / 100 + y / 400 - 32045;
+        // Step 2: JDN -> Hebrew year (increments at Tishrei)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-        // Step 2: Approximate Hebrew year then adjust
-=======
-        // Step 2: JDN -> Hebrew year (increments at Tishrei)
->>>>>>> 66880ae (corrected01)
-=======
-        // Step 2: JDN -> Hebrew year (increments at Tishrei)
->>>>>>> correct
         long hyr = (long)((jdn - 347997) * 19.0 / 6940.0) + 1;
         while (he_tishrei1(hyr + 1) <= jdn) hyr++;
         while (he_tishrei1(hyr)     >  jdn) hyr--;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
+
         // Step 3: Day of year within Hebrew year
         long yr_start = he_tishrei1(hyr);
         long day_of_yr = jdn - yr_start;
@@ -239,9 +226,7 @@ struct caltime::calendar caltime::convert_ce_to_he(struct calendar cal)
         while (day_of_yr >= mlen[hmo]) { day_of_yr -= mlen[hmo]; hmo++; }
 
         cal_he.date   = (int)(day_of_yr + 1);
-=======
-=======
->>>>>>> correct
+
         bool leap     = ((7 * hyr + 1) % 19) < 7;
         long yr_start = he_tishrei1(hyr);
         long yr_len   = he_tishrei1(hyr + 1) - yr_start;
@@ -278,11 +263,7 @@ struct caltime::calendar caltime::convert_ce_to_he(struct calendar cal)
             hmo = hmo_t;
 
         cal_he.date   = (int)(doy + 1);
-<<<<<<< HEAD
->>>>>>> 66880ae (corrected01)
-=======
->>>>>>> correct
-        cal_he.mo     = (int)hmo;
+       cal_he.mo     = (int)hmo;
         cal_he.year   = (int)hyr;
         cal_he.day    = cal.day;
         cal_he.result = P_OK;
@@ -303,9 +284,7 @@ struct caltime::calendar caltime::convert_ce_to_he(struct calendar cal)
 
 
 int display_local()
-=======
-=======
->>>>>>> correct
+
 struct caltime::calendar caltime::convert_he_to_ce(struct calendar cal)
 {
     struct calendar cal_ce;
@@ -408,18 +387,11 @@ int display_today()
 
 
 int display_he(int month, int date, int year)
-<<<<<<< HEAD
->>>>>>> 66880ae (corrected01)
-=======
->>>>>>> correct
 {
-
     int res;
 
     caltime cal;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
     int month;
     int date;
     int year;
@@ -467,9 +439,7 @@ int display_he(int month, int date, int year)
 
 };
 
-=======
-=======
->>>>>>> correct
+
     struct caltime::calendar cal_ce;
     struct caltime::calendar cal_he;    
     
@@ -592,26 +562,11 @@ int display_ce(int month, int date, int year)
 
     
 
-
-
-<<<<<<< HEAD
->>>>>>> 66880ae (corrected01)
-=======
->>>>>>> correct
-
 int main(int argc, char *argv[])
 {
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-    display_local();
 
 
-
-    return 0;
-=======
-=======
->>>>>>> correct
     int res = P_OK;
 
     if(argc == 1)
