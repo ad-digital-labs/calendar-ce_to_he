@@ -1,3 +1,27 @@
+/**
+ * @file calendar-he.cpp
+ * @brief Calendar conversion tool for Gregorian (Civil) and Hebrew (Jewish) calendars.
+ *
+ * This program provides functionality to convert dates between the Gregorian calendar
+ * and the Hebrew calendar. It includes classes and functions for date manipulation,
+ * leap year calculations, and bidirectional conversions.
+ *
+ * Features:
+ * - Convert today's date to both calendars
+ * - Convert Gregorian dates to Hebrew dates
+ * - Convert Hebrew dates to Gregorian dates
+ * - Handle leap years in the Hebrew calendar
+ *
+ * Usage:
+ * - No arguments: Display today's date in both calendars
+ * - -h/-H/-j/-J month date year: Convert Gregorian to Hebrew
+ * - -c/-C/-g/-G month date year: Convert Hebrew to Gregorian
+ *
+ * @author [Author Name] (if known, otherwise omit)
+ * @date [Date]
+ * @version 1.0
+ */
+
 #define P_OK 0
 #define P_ERR_RANGE -10
 #define P_ERR_VAL -20
@@ -12,72 +36,127 @@
 
 using namespace std;
 
+/**
+ * @class caltime
+ * @brief Main class for calendar date conversions and utilities.
+ *
+ * This class encapsulates the logic for converting between Gregorian and Hebrew calendars.
+ * It includes arrays for month and day names in multiple languages, and methods for
+ * date conversions and validations.
+ */
 class caltime
 {
     public:
 
+    /**
+     * @struct calendar
+     * @brief Structure representing a calendar date.
+     *
+     * Contains fields for day of week, month, date, year, and a result code for error handling.
+     */
     struct calendar
     {
 
-        int result;
+        int result; /**< Result code: P_OK on success, error codes otherwise */
 
-        int day;
-        int mo;
-        int date;
-        int year;
+        int day;    /**< Day of week (1=Sunday, 7=Saturday) */
+        int mo;     /**< Month (1-12 for Gregorian, 1-13 for Hebrew) */
+        int date;   /**< Day of month (1-31 for Gregorian, 1-30 for Hebrew) */
+        int year;   /**< Year */
     };
 
+    /** @brief Array of abbreviated English day names (Sunday to Saturday) */
     std::string str_day[7]
     {
         "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
     };
 
+    /** @brief Array of abbreviated English month names (January to December) */
     std::string str_month[12]
     {
         "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     };
 
+    /** @brief Array of Hebrew month names for non-leap years (Tishrei to Elul) */
     std::string str_month_he[12]
     {
         "תִּשְׁרֵי", "חֶשְׁוָן", "כִּסְלֵו", "טֵבֵת", "שְׁבָט", "אֲדָר", "נִיסָן", "אִיָּר", "סִיוָן", "תַּמּוּז", "אָב", "אֱלוּל"
     };
 
+    /** @brief Array of Hebrew month names for leap years (Tishrei to Elul, with Adar I and II) */
     std::string str_month_he_leap[13]
     {
         "תִּשְׁרֵי", "חֶשְׁוָן", "כִּסְלֵו", "טֵבֵת", "שְׁבָט", "אֲדָר א", "אֲדָר ב", "נִיסָן", "אִיָּר", "סִיוָן", "תַּמּוּז", "אָב", "אֱלוּל"
     };
 
 
+    /** @brief Array of Hebrew day names (Rishon to Shabbat) */
     std::string str_day_he[7]
     {
         "ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"
     };
 
 
+    /** @brief Array of transliterated Hebrew day names (Rishon to Shabbat) */
     std::string str_day_he_eng[7]
     {
         "Rishon", "Sheni", "Shlishi", "Revi'i", "Chamishi", "Shishi", "Shabbat"
     };
 
+    /** @brief Array of transliterated Hebrew month names for leap years */
     std::string str_month_he_leap_eng[13]
     {
         "Tishrei", "Cheshvan", "Kislev", "Tevet", "Shevat", "Adar I", "Adar II", "Nisan", "Iyar", "Sivan", "Tammuz", "Av", "Elul"
     };
 
+    /** @brief Array of transliterated Hebrew month names for non-leap years */
     std::string str_month_he_eng[12]
     {
         "Tishrei", "Cheshvan", "Kislev", "Tevet", "Shevat", "Adar", "Nisan", "Iyar", "Sivan", "Tammuz", "Av", "Elul"
     };
 
+    /**
+     * @brief Get the current Gregorian date.
+     * @return A calendar struct with today's Gregorian date.
+     */
     struct calendar cal_get_ce_today();
+
+    /**
+     * @brief Create a Gregorian calendar struct from given month, date, year.
+     * @param month Month (1-12)
+     * @param date Day of month (1-31)
+     * @param year Year
+     * @return A calendar struct with the specified Gregorian date.
+     */
     struct calendar cal_get_ce(int month, int date, int year);
+
+    /**
+     * @brief Convert a Gregorian date to Hebrew date.
+     * @param cal Gregorian calendar struct
+     * @return Hebrew calendar struct
+     */
     struct calendar convert_ce_to_he(struct calendar cal);
+
+    /**
+     * @brief Convert a Hebrew date to Gregorian date.
+     * @param cal Hebrew calendar struct
+     * @return Gregorian calendar struct
+     */
     struct calendar convert_he_to_ce(struct calendar cal);
 
 };
 
 
 // Returns JDN of 1 Tishrei for a given Hebrew year
+/**
+ * @brief Calculate the Julian Day Number (JDN) of 1 Tishrei for a given Hebrew year.
+ *
+ * This function implements the astronomical calculations to determine the start of
+ * the Hebrew year (Rosh Hashanah) in terms of Julian Day Numbers.
+ *
+ * @param y Hebrew year
+ * @return Julian Day Number of 1 Tishrei
+ */
 static long he_tishrei1(long y)
 {
     long months = (235 * y - 234) / 19;
@@ -100,6 +179,15 @@ static long he_tishrei1(long y)
 
 
 // determine the hebrew year is leap year
+/**
+ * @brief Determine if a Hebrew year is a leap year.
+ *
+ * In the Hebrew calendar, leap years are determined by the Metonic cycle.
+ * A year is leap if (7 * year + 1) % 19 < 7.
+ *
+ * @param year Hebrew year
+ * @return true if leap year, false otherwise
+ */
 bool is_hebrew_leap_year(int year)
 {
     bool res;
@@ -116,6 +204,13 @@ bool is_hebrew_leap_year(int year)
 
 };
 
+/**
+ * @brief Get the current Gregorian date from the system clock.
+ *
+ * Uses the local time to retrieve today's date in Gregorian calendar format.
+ *
+ * @return calendar struct with today's Gregorian date
+ */
 struct caltime::calendar caltime::cal_get_ce_today()
 {
     struct calendar cal;
@@ -133,7 +228,15 @@ struct caltime::calendar caltime::cal_get_ce_today()
 
 };
 
-
+/**
+ * @brief Convert a Gregorian date to Hebrew date.
+ *
+ * This function performs the conversion from Gregorian calendar to Hebrew calendar
+ * using astronomical calculations involving Julian Day Numbers.
+ *
+ * @param cal Gregorian calendar struct (must have valid month, date, year)
+ * @return Hebrew calendar struct, or with result=P_ERR_VAL on invalid input
+ */
 struct caltime::calendar caltime::convert_ce_to_he(struct calendar cal)
 {
     struct calendar cal_he;
@@ -201,7 +304,15 @@ struct caltime::calendar caltime::convert_ce_to_he(struct calendar cal)
     return cal_he;
 };
 
-
+/**
+ * @brief Convert a Hebrew date to Gregorian date.
+ *
+ * This function performs the conversion from Hebrew calendar to Gregorian calendar
+ * using astronomical calculations involving Julian Day Numbers.
+ *
+ * @param cal Hebrew calendar struct (must have valid month, date, year)
+ * @return Gregorian calendar struct, or with result=P_ERR_VAL on invalid input
+ */
 struct caltime::calendar caltime::convert_he_to_ce(struct calendar cal)
 {
     struct calendar cal_ce;
@@ -266,7 +377,13 @@ struct caltime::calendar caltime::convert_he_to_ce(struct calendar cal)
     return cal_ce;
 };
 
-
+/**
+ * @brief Display today's date in both Gregorian and Hebrew calendars.
+ *
+ * Retrieves the current date and converts it to Hebrew, then prints both dates.
+ *
+ * @return P_OK on success, error code otherwise
+ */
 int display_today()
 {
 
@@ -302,7 +419,16 @@ int display_today()
 
 };
 
-
+/**
+ * @brief Display a Gregorian date and its Hebrew equivalent.
+ *
+ * Takes a Gregorian date, validates it, converts to Hebrew, and displays both.
+ *
+ * @param month Gregorian month (1-12)
+ * @param date Gregorian day (1-31)
+ * @param year Gregorian year
+ * @return P_OK on success, P_ERR_RANGE or P_ERR_VAL on error
+ */
 int display_he(int month, int date, int year)
 {
 
@@ -369,7 +495,16 @@ int display_he(int month, int date, int year)
 
 };
 
-
+/**
+ * @brief Display a Hebrew date and its Gregorian equivalent.
+ *
+ * Takes a Hebrew date, validates it, converts to Gregorian, and displays both.
+ *
+ * @param month Hebrew month (1-13, depending on leap year)
+ * @param date Hebrew day (1-30)
+ * @param year Hebrew year
+ * @return P_OK on success, P_ERR_RANGE or P_ERR_VAL on error
+ */
 int display_ce(int month, int date, int year)
 {
 
@@ -440,6 +575,16 @@ int display_ce(int month, int date, int year)
 
 
 
+/**
+ * @brief Main entry point for the calendar conversion tool.
+ *
+ * Parses command line arguments and performs the requested calendar conversions.
+ * Supports displaying today's date or converting specific dates between calendars.
+ *
+ * @param argc Number of command line arguments
+ * @param argv Array of command line arguments
+ * @return Exit code (P_OK on success, error codes otherwise)
+ */
 int main(int argc, char *argv[])
 {
 
